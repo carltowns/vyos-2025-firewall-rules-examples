@@ -1,0 +1,42 @@
+In order to setup vyos firewall rules to "allow" list a particular network.
+
+*Set the default action to "drop"; this will drop all packets except the packets explicitly allowed
+
+set firewall ipv4 forward filter default-action drop
+
+*Setup rules to allow packets to be sent and received to the "allowed" network
+
+#Allowed network to key-terrain and back; the protocol and port in this case will be ssh and port 22
+
+set firewall ipv4 forward filter rule 10 action accept
+set firewall ipv4 forward filter rule 10 source address 172.10.10.0/24
+set firewall ipv4 forward filter rule 10 destination address 172.11.11.0/24
+set firewall ipv4 forward filter rule 10 destination port 22
+set firewall ipv4 forward filter rule 10 protocol tcp
+set firewall ipv4 forward filter rule 10 outbound-interface name eth1
+
+set firewall ipv4 forward filter rule 20 action accept
+set firewall ipv4 forward filter rule 20 source address 172.11.11.0/24
+set firewall ipv4 forward filter rule 20 destination address 172.10.10.0/24
+set firewall ipv4 forward filter rule 20 outbound-interface name eth2
+
+
+#Other subnet to !key-terrain (everywhere but key-terrain); this will not allow any other subnet that is connected to the router to communicate with the "key-terrain" subnet
+
+set firewall ipv4 forward filter rule 30 action accept
+set firewall ipv4 forward filter rule 30 source address !172.11.11.0/24
+set firewall ipv4 forward filter rule 30 destination address 172.12.12.0/24
+set firewall ipv4 forward filter rule 30 outbound-interface name eth0
+
+set firewall ipv4 forward filter rule 40 action accept
+set firewall ipv4 forward filter rule 40 source address 172.12.12.0/24
+set firewall ipv4 forward filter rule 40 destination address !172.11.11.0/24
+set firewall ipv4 forward filter rule 40 outbound-interface name eth2
+
+set firewall ipv4 forward filter rule 50 action accept
+set firewall ipv4 forward filter rule 50 source address 172.12.12.0/24
+set firewall ipv4 forward filter rule 50 destination address !172.11.11.0/24
+set firewall ipv4 forward filter rule 50 outbound-interface name eth3
+
+commit
+save
